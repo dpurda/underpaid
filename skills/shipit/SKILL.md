@@ -5,13 +5,13 @@ argument-hint: <ticket title/ID, or a description of the work>
 disable-model-invocation: true
 ---
 
-# Kanbandits: ticket → local branch → report
+# Underpaid: ticket → local branch → report
 
 Usage: `/shipit <ticket title/ID, or a description of the work>`
 
 The argument is passed in as `$ARGUMENTS`.
 
-You are **Captain Kanban** 🧭, the Team Lead of the Kanbandits crew. You own the ticket, the plan, the coordination and the final report. You do not write the feature code or the tests yourself; you delegate them:
+You are **Captain Kanban** 🧭, the Team Lead of the Underpaid crew. You own the ticket, the plan, the coordination and the final report. You do not write the feature code or the tests yourself; you delegate them:
 
 | Agent | Model | Job |
 |---|---|---|
@@ -31,7 +31,7 @@ Anything written in the user's name (ticket notes, Slack) uses "I", never "we".
 
 ## 0. Config
 
-Read `.claude/kanbandits.conf` in the repo root (plain `KEY=value` lines; values may contain spaces). If it is missing, **stop** and tell the user to run `~/kanbandits/install.sh` from the project.
+Read `.claude/underpaid.conf` in the repo root (plain `KEY=value` lines; values may contain spaces). If it is missing, **stop** and tell the user to run `~/underpaid/install.sh` from the project.
 
 | Key | Meaning |
 |---|---|
@@ -45,7 +45,7 @@ Read `.claude/kanbandits.conf` in the repo root (plain `KEY=value` lines; values
 | `WORKTREE` | `yes`: work in a separate git worktree; `no` (default): work in the repo folder |
 | `APP_CMD`, `APP_URL` | command that starts the app locally, and its URL, for UI QA; empty = UI QA off |
 
-Then read `.claude/kanbandits-notes.md` if it exists: what earlier runs learned about this project (how to run tests, conventions, pitfalls). Treat it like `CLAUDE.md`, and pass the relevant lines to the agents.
+Then read `.claude/underpaid-notes.md` if it exists: what earlier runs learned about this project (how to run tests, conventions, pitfalls). Treat it like `CLAUDE.md`, and pass the relevant lines to the agents.
 
 ## 1. Get the work item
 
@@ -117,7 +117,7 @@ If QA says an existing test would have to change, do not let anyone change it: r
 
 ## 7. UI QA (`pixel-pete`, only if the plan says UI: yes)
 
-Skip if UI is `no`, or `APP_CMD`/`APP_URL` are empty (say "UI QA off: no APP_CMD/APP_URL in kanbandits.conf" in the report). Otherwise spawn `pixel-pete` with: the acceptance criteria, the plan, the pages/flows to check, `WORKDIR`, `APP_CMD`, `APP_URL`, the branch name. Its problems go into the fix round (step 9), except design opinions, which go to the user.
+Skip if UI is `no`, or `APP_CMD`/`APP_URL` are empty (say "UI QA off: no APP_CMD/APP_URL in underpaid.conf" in the report). Otherwise spawn `pixel-pete` with: the acceptance criteria, the plan, the pages/flows to check, `WORKDIR`, `APP_CMD`, `APP_URL`, the branch name. Its problems go into the fix round (step 9), except design opinions, which go to the user.
 
 ## 8. Security (`lockdown-larry`, only when needed)
 
@@ -138,7 +138,7 @@ Over-engineering findings, Larry's low findings and Pete's design notes are not 
 
 ## 11. Project notes
 
-Update `.claude/kanbandits-notes.md` in the **repo root** (the user's checkout, not the worktree) with what this run learned that will help the next one, from your own work and the agents' reports: how to run or fix the test setup, conventions you discovered, pitfalls that cost a fix round, where things live. Only durable, project-specific facts; no ticket details. Merge with what's there (no duplicates, fix entries that turned out wrong), keep it short (under ~60 lines), grouped under headings. Skip if nothing new.
+Update `.claude/underpaid-notes.md` in the **repo root** (the user's checkout, not the worktree) with what this run learned that will help the next one, from your own work and the agents' reports: how to run or fix the test setup, conventions you discovered, pitfalls that cost a fix round, where things live. Only durable, project-specific facts; no ticket details. Merge with what's there (no duplicates, fix entries that turned out wrong), keep it short (under ~60 lines), grouped under headings. Skip if nothing new.
 
 ## 12. Report
 
@@ -157,7 +157,7 @@ Build one report:
 
 **If `NOTIFY=slack`**: post it with `curl -s -X POST -H 'Content-type: application/json' --data "$JSON" "$SLACK_WEBHOOK_URL"`, building `$JSON` as `{"text": "..."}` with proper escaping (e.g. `MSG="$MSG" python3 -c 'import json,os;print(json.dumps({"text":os.environ["MSG"]}))'`). Expect the reply `ok`. Slack mrkdwn: links are `<url|text>`, bullets are `•`. Never DM through a Slack MCP, and never write the webhook URL into files or replies. If `SLACK_WEBHOOK_URL` is unset, say so in the final reply and show the report there instead; don't fail the run for it.
 
-**If `NOTIFY=gmail`**: send it with the Gmail connector's `send_message` tool (load it via ToolSearch if deferred) to `NOTIFY_TO`, subject `Kanbandits: <work item> is ready`, the report as the body. Keep it to the essentials (title, status, branch, test numbers, review headlines, PR link if any): no code, diffs or test output. If the connector is unavailable or the send fails, say so in the final reply; don't fail the run for it.
+**If `NOTIFY=gmail`**: send it with the Gmail connector's `send_message` tool (load it via ToolSearch if deferred) to `NOTIFY_TO`, subject `Underpaid: <work item> is ready`, the report as the body. Keep it to the essentials (title, status, branch, test numbers, review headlines, PR link if any): no code, diffs or test output. If the connector is unavailable or the send fails, say so in the final reply; don't fail the run for it.
 
 **Always**: give the report in the final reply too (Markdown).
 

@@ -1,10 +1,10 @@
-# Kanbandits
+# Underpaid
 
-<p align="center"><img src="assets/kanbandits-logo.svg" alt="KANBANDITS · they steal your tickets and bring back code" width="820"></p>
+<p align="center"><img src="assets/underpaid-logo.svg" alt="UNDERPAID · the hardest-working, lowest-paid devs you will ever hire" width="720"></p>
 
-**They steal your tickets and bring back code.** From a ticket (or a plain description) to a reviewed, tested branch, with one command.
+**The hardest-working, lowest-paid devs you will ever hire.** They work for tokens. From a ticket (or a plain description) to a reviewed, tested branch, with one command.
 
-Kanbandits is a small crew of [Claude Code](https://docs.claude.com/en/docs/claude-code) agents. Give it a ticket from Notion, Linear, Jira or GitHub Issues, or just describe the work. It plans, writes the code, tests it end to end and reviews it, then reports back (and optionally pings you on Slack or Gmail). The changes are left **uncommitted** on a new branch so you review them yourself.
+Underpaid is a small crew of [Claude Code](https://docs.claude.com/en/docs/claude-code) agents. Give it a ticket from Notion, Linear, Jira or GitHub Issues, or just describe the work. It plans, writes the code, tests it end to end and reviews it, then reports back (and optionally pings you on Slack or Gmail). The changes are left **uncommitted** on a new branch so you review them yourself.
 
 ```
 /shipit Add export button to receivables
@@ -48,14 +48,14 @@ Ticket (Notion / Linear / Jira / GitHub) or description
 🛠️ Codey fixes real bugs / security / broken UI ──► 🐛 Bugsy re-runs the suite   (one round)
    │
    ▼
-🧭 Captain Kanban ── writes what it learned to .claude/kanbandits-notes.md
+🧭 Captain Kanban ── writes what it learned to .claude/underpaid-notes.md
    │
    ▼
 Report (terminal, + Slack or Gmail if enabled): plan, changes, tests, UI, security,
 what was fixed, suggestions left for you  (nothing committed, pushed or merged)
 ```
 
-**Gets better over time:** after each run the Lead adds what it learned about your project (how tests run, conventions, pitfalls) to `.claude/kanbandits-notes.md`, and every run reads it first. It's plain Markdown: edit it whenever you like.
+**Gets better over time:** after each run the Lead adds what it learned about your project (how tests run, conventions, pitfalls) to `.claude/underpaid-notes.md`, and every run reads it first. It's plain Markdown: edit it whenever you like.
 
 When the work is deployed, tell Captain Kanban, e.g. *"the ticket X is in production, PR https://github.com/.../pull/123"*. It closes the ticket (status, PR link and a short write-up).
 
@@ -74,9 +74,9 @@ When the work is deployed, tell Captain Kanban, e.g. *"the ticket X is in produc
 Run the installer from **the project you want to use it in**:
 
 ```bash
-git clone https://github.com/dpurda/kanbandits.git ~/kanbandits
+git clone https://github.com/dpurda/underpaid.git ~/underpaid
 cd ~/path/to/your/project
-~/kanbandits/install.sh
+~/underpaid/install.sh
 ```
 
 The installer is interactive (arrow keys for choices, ←/→ or y/n for yes/no) and goes through six steps:
@@ -84,7 +84,7 @@ The installer is interactive (arrow keys for choices, ←/→ or y/n for yes/no)
 1. **Claude Code**: checks it's installed; offers to keep an existing config
 2. **Ticketing system**: Notion, Linear, Jira, GitHub Issues or none; checks it's connected and walks you through authenticating
 3. **Notifications**: Slack (checks `SLACK_WEBHOOK_URL`, can save it and send a test message), Gmail (checks the connector, asks the address, can allow sending without a prompt) or none
-4. **Project settings**: test command (auto-detected for Ruby, Elixir, Rust, Go, Java/Kotlin, .NET, Swift, PHP, Python and JS package managers), lint command, base branch, plan approval (large changes / always / never), whether to work in a separate git worktree, and the command + URL that start your app (for UI QA); writes `<project>/.claude/kanbandits.conf`
+4. **Project settings**: test command (auto-detected for Ruby, Elixir, Rust, Go, Java/Kotlin, .NET, Swift, PHP, Python and JS package managers), lint command, base branch, plan approval (large changes / always / never), whether to work in a separate git worktree, and the command + URL that start your app (for UI QA); writes `<project>/.claude/underpaid.conf`
 5. **Stack skills**: detects the stack and offers what makes the crew better at it (see below)
 6. **Install**: copies the skill, agents and chosen stack skills into `<project>/.claude/`, adds them to `.git/info/exclude` so they **never end up in the project's commits** (your `.gitignore` is not touched), and offers to move old global `shipit` / `ticket-to-pr` skills out of the way
 
@@ -107,7 +107,7 @@ Each suggestion is a yes/no question; anything already installed is skipped.
 
 The `*-lsp` plugins need the language server on your `PATH` (the installer warns when it's missing). Codey loads the matching expert skill before writing code.
 
-Re-running it is safe: it offers to keep your existing config (or edit `.claude/kanbandits.conf` by hand for a single change), and changed files are backed up as `*.bak.<timestamp>` before being overwritten.
+Re-running it is safe: it offers to keep your existing config (or edit `.claude/underpaid.conf` by hand for a single change), and changed files are backed up as `*.bak.<timestamp>` before being overwritten.
 
 ## Usage
 
@@ -133,22 +133,22 @@ Use `/agents` in Claude Code to see the crew.
 ## Update
 
 ```bash
-cd ~/kanbandits && git pull
-cd ~/path/to/your/project && ~/kanbandits/install.sh
+cd ~/underpaid && git pull
+cd ~/path/to/your/project && ~/underpaid/install.sh
 ```
 
 ## Uninstall
 
 ```sh
-cd <your project> && ~/kanbandits/install.sh --uninstall
+cd <your project> && ~/underpaid/install.sh --uninstall
 ```
 
-Shows what it will remove and asks first. It removes only what Kanbandits installed: `/shipit`, the agents, the project notes and UI screenshots, the stack skills and plugins it added, `.claude/kanbandits.conf`, the Gmail send permission and its `.git/info/exclude` entries. Your own skills, agents and settings, `*.bak.*` backups, and anything global (shell rc, Slack webhook) are left alone.
+Shows what it will remove and asks first. It removes only what Underpaid installed: `/shipit`, the agents, the project notes and UI screenshots, the stack skills and plugins it added, `.claude/underpaid.conf`, the Gmail send permission and its `.git/info/exclude` entries. Your own skills, agents and settings, `*.bak.*` backups, and anything global (shell rc, Slack webhook) are left alone.
 
 ## Layout
 
 ```
-kanbandits/
+underpaid/
 ├── install.sh
 ├── README.md
 ├── skills/shipit/SKILL.md     # 🧭 Captain Kanban
@@ -165,7 +165,7 @@ kanbandits/
 
 ## Configuration
 
-Each project gets its own `.claude/kanbandits.conf`:
+Each project gets its own `.claude/underpaid.conf`:
 
 ```ini
 TICKETS=notion            # notion | linear | jira | github | none

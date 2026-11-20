@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Kanbandits: installs the /shipit Team Lead skill and its agents into the current project's .claude/.
-# Usage: cd <your project> && ~/kanbandits/install.sh [--uninstall]
+# Underpaid: installs the /shipit Team Lead skill and its agents into the current project's .claude/.
+# Usage: cd <your project> && ~/underpaid/install.sh [--uninstall]
 set -euo pipefail
 
 VERSION="1.0.0"
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 CLAUDE_DIR="$PROJECT_DIR/.claude"
-CONF="$CLAUDE_DIR/kanbandits.conf"
+CONF="$CLAUDE_DIR/underpaid.conf"
 USER_CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 
 # --- UI ------------------------------------------------------------------------
@@ -17,7 +17,7 @@ if [[ -t 1 ]]; then # cyan → violet palette, matches the logo
 else
   R="" B="" DIM="" LINE="" ACC="" OK="" WARN="" ERR=""
 fi
-W=86 SMALL=0 # the big logo needs ~89 columns; narrower terminals get a compact header
+W=78 SMALL=0 # the big logo needs ~81 columns; narrower terminals get a compact header
 cols=$(tput cols 2>/dev/null || echo 120); (( cols < W + 3 )) && W=72 SMALL=1
 BAR="  "
 Q="${ACC}?${R}"; [[ -n "$R" ]] && Q=$'\033[5m'"${ACC}●${R}" # blinking dot = where you are
@@ -36,20 +36,20 @@ banner() {
   printf "\n${LINE}╭─${R}${B}${ACC} YOUR BEST TEAM ${R}${LINE}%s─╮${R}\n" "$(rule $((W - 17)))"
   frow ""
   if (( SMALL )); then
-    frow "  ${B}${ACC}K A N B A N D I T S${R}"
+    frow "  ${B}${ACC}U N D E R P A I D${R}"
   else while IFS= read -r l; do
     if [[ -n "$R" ]]; then frow "     "$'\033[1;38;5;'"${c[i++]}m$l$R"; else frow "     $l"; fi
   done <<'EOF'
-██╗  ██╗ █████╗ ███╗   ██╗██████╗  █████╗ ███╗   ██╗██████╗ ██╗████████╗███████╗
-██║ ██╔╝██╔══██╗████╗  ██║██╔══██╗██╔══██╗████╗  ██║██╔══██╗██║╚══██╔══╝██╔════╝
-█████╔╝ ███████║██╔██╗ ██║██████╔╝███████║██╔██╗ ██║██║  ██║██║   ██║   ███████╗
-██╔═██╗ ██╔══██║██║╚██╗██║██╔══██╗██╔══██║██║╚██╗██║██║  ██║██║   ██║   ╚════██║
-██║  ██╗██║  ██║██║ ╚████║██████╔╝██║  ██║██║ ╚████║██████╔╝██║   ██║   ███████║
-╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝╚═════╝ ╚═╝   ╚═╝   ╚══════╝
+██╗   ██╗███╗   ██╗██████╗ ███████╗██████╗ ██████╗  █████╗ ██╗██████╗
+██║   ██║████╗  ██║██╔══██╗██╔════╝██╔══██╗██╔══██╗██╔══██╗██║██╔══██╗
+██║   ██║██╔██╗ ██║██║  ██║█████╗  ██████╔╝██████╔╝███████║██║██║  ██║
+██║   ██║██║╚██╗██║██║  ██║██╔══╝  ██╔══██╗██╔═══╝ ██╔══██║██║██║  ██║
+╚██████╔╝██║ ╚████║██████╔╝███████╗██║  ██║██║     ██║  ██║██║██████╔╝
+ ╚═════╝ ╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚═╝╚═════╝
 EOF
   fi
   frow ""
-  frow "  ${ACC}>${R} ${B}${ACC}THEY STEAL YOUR TICKETS AND BRING BACK CODE${R}"
+  frow "  ${ACC}>${R} ${B}${ACC}THE HARDEST-WORKING, LOWEST-PAID DEVS YOU WILL EVER HIRE${R}"
   frow "  ${ACC}>${R} ${DIM}ticket → plan → tests → code → QA → review${R}$(printf '%*s' $((W - 49 - ${#VERSION})) '')${DIM}v$VERSION${R}"
   local d; d=$(tilde "$PROJECT_DIR"); (( ${#d} > W - 6 )) && d="…${d: -$((W - 7))}"
   frow "  ${ACC}>${R} ${DIM}$d${R}"
@@ -144,9 +144,9 @@ conf_get() { sed -n "s/^$1=//p" "$CONF" 2>/dev/null | head -1; }
 if [[ "${1:-}" == --uninstall ]]; then
   banner
   section "" "Uninstall"
-  [[ -f "$CONF" || -d "$CLAUDE_DIR/skills/shipit" ]] || die "Kanbandits is not installed in $(tilde "$PROJECT_DIR")."
+  [[ -f "$CONF" || -d "$CLAUDE_DIR/skills/shipit" ]] || die "Underpaid is not installed in $(tilde "$PROJECT_DIR")."
   SK=$(conf_get INSTALLED_SKILLS); PL=$(conf_get INSTALLED_PLUGINS)
-  PATHS=(skills/shipit kanbandits.conf kanbandits-notes.md kanbandits-screenshots shipyard.conf shipyard-notes.md shipyard-screenshots $(cd "$REPO_DIR/agents" && printf 'agents/%s ' *.md))
+  PATHS=(skills/shipit underpaid.conf underpaid-notes.md underpaid-screenshots shipyard.conf shipyard-notes.md shipyard-screenshots kanbandits.conf kanbandits-notes.md kanbandits-screenshots $(cd "$REPO_DIR/agents" && printf 'agents/%s ' *.md))
   for n in $SK; do PATHS+=("skills/$n"); done
   say "${B}This removes from $(tilde "$CLAUDE_DIR"):${R}"
   for f in "${PATHS[@]}"; do [[ -e "$CLAUDE_DIR/$f" ]] && hint "  • $f"; done
@@ -154,7 +154,7 @@ if [[ "${1:-}" == --uninstall ]]; then
   hint "  • the Gmail send permission and the .git/info/exclude entries"
   hint "  Backups (*.bak.*) and global settings (shell rc, Slack webhook) are left alone."
   printf "\n\n"
-  ask "Remove Kanbandits from $(tilde "$PROJECT_DIR")?" || die "Aborted."
+  ask "Remove Underpaid from $(tilde "$PROJECT_DIR")?" || die "Aborted."
   for f in "${PATHS[@]}"; do [[ -e "$CLAUDE_DIR/$f" ]] && rm -rf "${CLAUDE_DIR:?}/$f" && ok "removed .claude/$f"; done
   for n in $PL; do
     (cd "$PROJECT_DIR" && claude plugin uninstall "$n@claude-plugins-official" --scope local >/dev/null 2>&1) \
@@ -186,7 +186,7 @@ fi
 # --- Welcome -------------------------------------------------------------------
 banner
 section "" "Setup"
-say "${B}What Kanbandits does${R}"
+say "${B}What Underpaid does${R}"
 hint "  You give /shipit a ticket; a crew of agents ships it:"
 say "    ${ACC}Captain Kanban${R}    ${DIM}plans + coordinates${R}"
 say "    ${ACC}Codey McCodeface${R}  ${DIM}writes the code${R}"
@@ -199,23 +199,23 @@ echo
 say "${B}Setup${R} ${DIM}· optional connections, I'll help you authenticate each one${R}"
 hint "  • a ticketing system: Notion, Linear, Jira or GitHub Issues"
 hint "  • Slack, via an incoming webhook, to ping you when work is ready"
-[[ "$PROJECT_DIR" == "$REPO_DIR" ]] && die "Run this from the target project's folder, not from kanbandits."
+[[ "$PROJECT_DIR" == "$REPO_DIR" ]] && die "Run this from the target project's folder, not from underpaid."
 printf "\n\n"
-ask "Install Kanbandits into $(tilde "$PROJECT_DIR")?" || die "Aborted."
+ask "Install Underpaid into $(tilde "$PROJECT_DIR")?" || die "Aborted."
 endsec
 
 # --- Claude Code ---------------------------------------------------------------
 section "1/6" "Claude Code"
 command -v claude >/dev/null || die "claude is not installed: https://docs.claude.com/en/docs/claude-code"
 ok "$(claude --version)"
-# Projects installed under the old name (Shipyard): move their files to the new names.
-for old in shipyard.conf shipyard-notes.md shipyard-screenshots; do
-  new="${old/shipyard/kanbandits}"
+# Projects installed under an old name (Shipyard, Kanbandits): move their files to the new names.
+for old in {shipyard,kanbandits}.conf {shipyard,kanbandits}-notes.md {shipyard,kanbandits}-screenshots; do
+  new="underpaid${old#shipyard}"; new="${new/underpaidkanbandits/underpaid}"
   [[ -e "$CLAUDE_DIR/$old" && ! -e "$CLAUDE_DIR/$new" ]] && mv "$CLAUDE_DIR/$old" "$CLAUDE_DIR/$new" && ok "Renamed .claude/$old → $new"
 done
 if git -C "$PROJECT_DIR" rev-parse --git-dir >/dev/null 2>&1; then
   EX="$(git -C "$PROJECT_DIR" rev-parse --git-path info/exclude)"; [[ "$EX" = /* ]] || EX="$PROJECT_DIR/$EX"
-  [[ -f "$EX" ]] && sed -i '/^\/\.claude\/shipyard/d' "$EX"
+  [[ -f "$EX" ]] && sed -i -E '/^\/\.claude\/(shipyard|kanbandits)/d' "$EX"
 fi
 REUSE=0
 if [[ -f "$CONF" ]] && ask "Existing config found ($(tilde "$CONF")). Keep it?"; then
@@ -354,7 +354,7 @@ if [[ "$NOTIFY" == slack ]]; then
   fi
   if [[ "$NOTIFY" == slack ]] && ask "Send a test message to Slack?"; then
     resp=$(curl -s -X POST -H 'Content-type: application/json' \
-      --data '{"text":"🏴‍☠️ Kanbandits: connection test ✔"}' "$SLACK_WEBHOOK_URL" || true)
+      --data '{"text":"💸 Underpaid: connection test ✔"}' "$SLACK_WEBHOOK_URL" || true)
     [[ "$resp" == ok ]] && ok "Test message delivered" || die "Webhook replied: '$resp'"
   fi
 fi
@@ -418,7 +418,7 @@ if (( ! REUSE )); then
   fi
   mkdir -p "$CLAUDE_DIR"
   cat > "$CONF" <<EOF
-# Kanbandits config, read by /shipit. Re-run install.sh to regenerate, or edit by hand.
+# Underpaid config, read by /shipit. Re-run install.sh to regenerate, or edit by hand.
 TICKETS=$TICKETS
 BOARD=$BOARD
 STATUS_IN_PROGRESS=$STATUS_IN_PROGRESS
@@ -446,7 +446,7 @@ endsec
 # --- Stack skills --------------------------------------------------------------
 section "5/6" "Stack skills"
 # Detect the stack and offer what makes Codey and Nick better at it:
-#   skill  = expert skill bundled in kanbandits/stack-skills, copied into .claude/skills
+#   skill  = expert skill bundled in underpaid/stack-skills, copied into .claude/skills
 #   plugin = official Claude plugin (LSP = real code intelligence), installed for this project only
 SUGGEST=()   # "kind|name|why|what|binary the plugin needs"
 add() { [[ " ${SUGGEST[*]} " == *"|$2|"* ]] || SUGGEST+=("$1|$2|$3|$4|${5:-}"); }
@@ -537,14 +537,14 @@ if git -C "$PROJECT_DIR" rev-parse --git-dir >/dev/null 2>&1; then
   EXCLUDE="$(git -C "$PROJECT_DIR" rev-parse --git-path info/exclude)"
   [[ "$EXCLUDE" = /* ]] || EXCLUDE="$PROJECT_DIR/$EXCLUDE"
   mkdir -p "$(dirname "$EXCLUDE")"
-  for p in /.claude/skills/shipit/ /.claude/kanbandits.conf /.claude/kanbandits-notes.md /.claude/kanbandits-screenshots/ $(cd "$REPO_DIR/agents" && printf '/.claude/agents/%s ' *.md) \
+  for p in /.claude/skills/shipit/ /.claude/underpaid.conf /.claude/underpaid-notes.md /.claude/underpaid-screenshots/ $(cd "$REPO_DIR/agents" && printf '/.claude/agents/%s ' *.md) \
            ${INSTALL_SKILLS[@]+$(printf '/.claude/skills/%s/ ' "${INSTALL_SKILLS[@]}")}; do
     grep -qxF "$p" "$EXCLUDE" 2>/dev/null || echo "$p" >> "$EXCLUDE"
   done
   ok "Git-ignored locally ${DIM}(.git/info/exclude · never committed)${R}"
 fi
 
-# A global `shipit` would override the project one; a global `ticket-to-pr` is the old pre-Kanbandits version.
+# A global `shipit` would override the project one; a global `ticket-to-pr` is the old pre-Underpaid version.
 for name in shipit ticket-to-pr; do
   GLOBAL_SKILL="$USER_CLAUDE_DIR/skills/$name"
   [[ -d "$GLOBAL_SKILL" ]] || continue
@@ -577,7 +577,7 @@ box "SYSTEM STATUS: READY TO SHIP" \
   "${ACC}Tickets${R}   $TICKETS_LABEL" \
   "${ACC}Notify${R}    $NOTIFY" \
   "${ACC}Tests${R}     $(conf_get TEST_CMD)" \
-  "${ACC}Config${R}    .claude/kanbandits.conf" \
+  "${ACC}Config${R}    .claude/underpaid.conf" \
   "" \
   "${B}${ACC}Run it${R}" \
   "  1  cd $(tilde "$PROJECT_DIR")" \
