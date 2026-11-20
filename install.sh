@@ -407,7 +407,7 @@ exists(){ local f; for f in "$@"; do compgen -G "$PROJECT_DIR/$f" >/dev/null && 
 SUGGEST=()   # "kind|name|why|what|binary the plugin needs"
 add() { [[ " ${SUGGEST[*]} " == *"|$2|"* ]] || SUGGEST+=("$1|$2|$3|$4|${5:-}"); }
 FRONTEND=0
-if has Gemfile '^\s*gem .rails.'; then
+if has Gemfile '^\s*gem .rails.' || has gems.rb '^\s*gem .rails.'; then
   add skill  rails-expert "Rails" "ActiveRecord, N+1, callbacks, security, testing"
   add plugin ruby-lsp "Ruby" "code intelligence for Ruby" ruby-lsp
   [[ -d "$PROJECT_DIR/app/views" ]] && FRONTEND=1
