@@ -1,6 +1,6 @@
 # Kanbandits
 
-<p align="center"><img src="assets/logo.svg" alt="KANBANDITS · they steal your tickets and bring back code" width="820"></p>
+<p align="center"><img src="assets/kanbandits-logo.svg" alt="KANBANDITS · they steal your tickets and bring back code" width="820"></p>
 
 **They steal your tickets and bring back code.** From a ticket (or a plain description) to a reviewed, tested branch, with one command.
 
