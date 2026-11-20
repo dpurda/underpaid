@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Shipyard: installs the /shipit Team Lead skill and its agents into the current project's .claude/.
-# Usage: cd <your project> && ~/shipyard/install.sh [--uninstall]
+# Kanbandits: installs the /shipit Team Lead skill and its agents into the current project's .claude/.
+# Usage: cd <your project> && ~/kanbandits/install.sh [--uninstall]
 set -euo pipefail
 
 VERSION="1.0.0"
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 CLAUDE_DIR="$PROJECT_DIR/.claude"
-CONF="$CLAUDE_DIR/shipyard.conf"
+CONF="$CLAUDE_DIR/kanbandits.conf"
 USER_CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 
 # --- UI ------------------------------------------------------------------------
@@ -17,7 +17,8 @@ if [[ -t 1 ]]; then # cyan → violet palette, matches the logo
 else
   R="" B="" DIM="" LINE="" ACC="" OK="" WARN="" ERR=""
 fi
-W=72
+W=86 SMALL=0 # the big logo needs ~89 columns; narrower terminals get a compact header
+cols=$(tput cols 2>/dev/null || echo 120); (( cols < W + 3 )) && W=72 SMALL=1
 BAR="  "
 Q="${ACC}?${R}"; [[ -n "$R" ]] && Q=$'\033[5m'"${ACC}●${R}" # blinking dot = where you are
 tilde() { printf '%s' "${1/#$HOME/~}"; }
@@ -34,18 +35,22 @@ banner() {
   local c=(51 45 39 33 63 99) i=0 l p
   printf "\n${LINE}╭─${R}${B}${ACC} YOUR BEST TEAM ${R}${LINE}%s─╮${R}\n" "$(rule $((W - 17)))"
   frow ""
-  while IFS= read -r l; do
+  if (( SMALL )); then
+    frow "  ${B}${ACC}K A N B A N D I T S${R}"
+  else while IFS= read -r l; do
     if [[ -n "$R" ]]; then frow "     "$'\033[1;38;5;'"${c[i++]}m$l$R"; else frow "     $l"; fi
   done <<'EOF'
-███████╗██╗  ██╗██╗██████╗ ██╗   ██╗ █████╗ ██████╗ ██████╗
-██╔════╝██║  ██║██║██╔══██╗╚██╗ ██╔╝██╔══██╗██╔══██╗██╔══██╗
-███████╗███████║██║██████╔╝ ╚████╔╝ ███████║██████╔╝██║  ██║
-╚════██║██╔══██║██║██╔═══╝   ╚██╔╝  ██╔══██║██╔══██╗██║  ██║
-███████║██║  ██║██║██║        ██║   ██║  ██║██║  ██║██████╔╝
-╚══════╝╚═╝  ╚═╝╚═╝╚═╝        ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝
+██╗  ██╗ █████╗ ███╗   ██╗██████╗  █████╗ ███╗   ██╗██████╗ ██╗████████╗███████╗
+██║ ██╔╝██╔══██╗████╗  ██║██╔══██╗██╔══██╗████╗  ██║██╔══██╗██║╚══██╔══╝██╔════╝
+█████╔╝ ███████║██╔██╗ ██║██████╔╝███████║██╔██╗ ██║██║  ██║██║   ██║   ███████╗
+██╔═██╗ ██╔══██║██║╚██╗██║██╔══██╗██╔══██║██║╚██╗██║██║  ██║██║   ██║   ╚════██║
+██║  ██╗██║  ██║██║ ╚████║██████╔╝██║  ██║██║ ╚████║██████╔╝██║   ██║   ███████║
+╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝╚═════╝ ╚═╝   ╚═╝   ╚══════╝
 EOF
+  fi
   frow ""
-  frow "  ${ACC}>${R} ${B}${ACC}TICKET → PLAN → CODE → QA → REVIEW${R}$(printf '%*s' 26 '')${DIM}v$VERSION${R}"
+  frow "  ${ACC}>${R} ${B}${ACC}THEY STEAL YOUR TICKETS AND BRING BACK CODE${R}"
+  frow "  ${ACC}>${R} ${DIM}ticket → plan → tests → code → QA → review${R}$(printf '%*s' $((W - 49 - ${#VERSION})) '')${DIM}v$VERSION${R}"
   local d; d=$(tilde "$PROJECT_DIR"); (( ${#d} > W - 6 )) && d="…${d: -$((W - 7))}"
   frow "  ${ACC}>${R} ${DIM}$d${R}"
   if [[ -t 1 ]]; then # boot animation
@@ -117,7 +122,7 @@ choose() {
 prompt() {
   local a; read -r -p "${BAR}${Q} $2${3:+ ${DIM}($3)${R}} ${ACC}›${R} " a
   printf -v "$1" '%s' "${a:-$3}"
-  (( TTY )) && printf "\033[1A\r\033[K${BAR}${OK}✓${R} %s ${ACC}%s${R}\n" "$2" "${a:-$3}"
+  if (( TTY )); then printf "\033[1A\r\033[K${BAR}${OK}✓${R} %s ${ACC}%s${R}\n" "$2" "${a:-$3}"; fi
 }
 # box "Title" lines... (plain text only: width is counted in characters)
 box() { # box "Title" lines... (lines may contain colors; width ignores them)
@@ -130,15 +135,18 @@ box() { # box "Title" lines... (lines may contain colors; width ignores them)
   for l in "$@"; do printf "${LINE}│${R}  %s%*s${LINE}│${R}\n" "$l" $((w - 2 - $(vis "$l"))) ''; done
   printf "${LINE}╰%s╯${R}\n\n" "$(rule "$w")"
 }
+# project file checks: has <file> <regex>, exists <glob>...
+has()   { grep -qiE "$2" "$PROJECT_DIR/$1" 2>/dev/null; }
+exists(){ local f; for f in "$@"; do compgen -G "$PROJECT_DIR/$f" >/dev/null && return 0; done; return 1; }
 conf_get() { sed -n "s/^$1=//p" "$CONF" 2>/dev/null | head -1; }
 
 # --- Uninstall -----------------------------------------------------------------
 if [[ "${1:-}" == --uninstall ]]; then
   banner
   section "" "Uninstall"
-  [[ -f "$CONF" || -d "$CLAUDE_DIR/skills/shipit" ]] || die "Shipyard is not installed in $(tilde "$PROJECT_DIR")."
+  [[ -f "$CONF" || -d "$CLAUDE_DIR/skills/shipit" ]] || die "Kanbandits is not installed in $(tilde "$PROJECT_DIR")."
   SK=$(conf_get INSTALLED_SKILLS); PL=$(conf_get INSTALLED_PLUGINS)
-  PATHS=(skills/shipit shipyard.conf $(cd "$REPO_DIR/agents" && printf 'agents/%s ' *.md))
+  PATHS=(skills/shipit kanbandits.conf kanbandits-notes.md kanbandits-screenshots shipyard.conf shipyard-notes.md shipyard-screenshots $(cd "$REPO_DIR/agents" && printf 'agents/%s ' *.md))
   for n in $SK; do PATHS+=("skills/$n"); done
   say "${B}This removes from $(tilde "$CLAUDE_DIR"):${R}"
   for f in "${PATHS[@]}"; do [[ -e "$CLAUDE_DIR/$f" ]] && hint "  • $f"; done
@@ -146,7 +154,7 @@ if [[ "${1:-}" == --uninstall ]]; then
   hint "  • the Gmail send permission and the .git/info/exclude entries"
   hint "  Backups (*.bak.*) and global settings (shell rc, Slack webhook) are left alone."
   printf "\n\n"
-  ask "Remove Shipyard from $(tilde "$PROJECT_DIR")?" || die "Aborted."
+  ask "Remove Kanbandits from $(tilde "$PROJECT_DIR")?" || die "Aborted."
   for f in "${PATHS[@]}"; do [[ -e "$CLAUDE_DIR/$f" ]] && rm -rf "${CLAUDE_DIR:?}/$f" && ok "removed .claude/$f"; done
   for n in $PL; do
     (cd "$PROJECT_DIR" && claude plugin uninstall "$n@claude-plugins-official" --scope local >/dev/null 2>&1) \
@@ -165,8 +173,7 @@ PY
     EXCLUDE="$(git -C "$PROJECT_DIR" rev-parse --git-path info/exclude)"
     [[ "$EXCLUDE" = /* ]] || EXCLUDE="$PROJECT_DIR/$EXCLUDE"
     for f in "${PATHS[@]}"; do
-      [[ -d "$REPO_DIR/$f" || "$f" == skills/* ]] && f="$f/"
-      [[ -f "$EXCLUDE" ]] && { grep -vxF "/.claude/$f" "$EXCLUDE" > "$EXCLUDE.tmp" || true; mv "$EXCLUDE.tmp" "$EXCLUDE"; }
+      [[ -f "$EXCLUDE" ]] && { grep -vxF -e "/.claude/$f" -e "/.claude/$f/" "$EXCLUDE" > "$EXCLUDE.tmp" || true; mv "$EXCLUDE.tmp" "$EXCLUDE"; }
     done
     ok "cleaned .git/info/exclude"
   fi
@@ -179,26 +186,37 @@ fi
 # --- Welcome -------------------------------------------------------------------
 banner
 section "" "Setup"
-say "${B}What Shipyard does${R}"
+say "${B}What Kanbandits does${R}"
 hint "  You give /shipit a ticket; a crew of agents ships it:"
 say "    ${ACC}Captain Kanban${R}    ${DIM}plans + coordinates${R}"
 say "    ${ACC}Codey McCodeface${R}  ${DIM}writes the code${R}"
-say "    ${ACC}Bugsy Malone${R}      ${DIM}tests + runs the suite${R}"
-say "    ${ACC}Nitpick Nick${R}      ${DIM}reviews (+ ponytail)${R}"
+say "    ${ACC}Bugsy Malone${R}      ${DIM}writes the tests first, then runs the suite${R}"
+say "    ${ACC}Pixel Pete${R}        ${DIM}checks the UI in a real browser${R}"
+say "    ${ACC}Lockdown Larry${R}    ${DIM}security review, when the change is sensitive${R}"
+say "    ${ACC}Nitpick Nick${R}      ${DIM}reviews; real bugs go back for one fix round${R}"
 hint "  Everything stays uncommitted on your machine, ready for you to review."
 echo
 say "${B}Setup${R} ${DIM}· optional connections, I'll help you authenticate each one${R}"
 hint "  • a ticketing system: Notion, Linear, Jira or GitHub Issues"
 hint "  • Slack, via an incoming webhook, to ping you when work is ready"
-[[ "$PROJECT_DIR" == "$REPO_DIR" ]] && die "Run this from the target project's folder, not from shipyard."
+[[ "$PROJECT_DIR" == "$REPO_DIR" ]] && die "Run this from the target project's folder, not from kanbandits."
 printf "\n\n"
-ask "Install Shipyard into $(tilde "$PROJECT_DIR")?" || die "Aborted."
+ask "Install Kanbandits into $(tilde "$PROJECT_DIR")?" || die "Aborted."
 endsec
 
 # --- Claude Code ---------------------------------------------------------------
 section "1/6" "Claude Code"
 command -v claude >/dev/null || die "claude is not installed: https://docs.claude.com/en/docs/claude-code"
 ok "$(claude --version)"
+# Projects installed under the old name (Shipyard): move their files to the new names.
+for old in shipyard.conf shipyard-notes.md shipyard-screenshots; do
+  new="${old/shipyard/kanbandits}"
+  [[ -e "$CLAUDE_DIR/$old" && ! -e "$CLAUDE_DIR/$new" ]] && mv "$CLAUDE_DIR/$old" "$CLAUDE_DIR/$new" && ok "Renamed .claude/$old → $new"
+done
+if git -C "$PROJECT_DIR" rev-parse --git-dir >/dev/null 2>&1; then
+  EX="$(git -C "$PROJECT_DIR" rev-parse --git-path info/exclude)"; [[ "$EX" = /* ]] || EX="$PROJECT_DIR/$EX"
+  [[ -f "$EX" ]] && sed -i '/^\/\.claude\/shipyard/d' "$EX"
+fi
 REUSE=0
 if [[ -f "$CONF" ]] && ask "Existing config found ($(tilde "$CONF")). Keep it?"; then
   REUSE=1
@@ -336,7 +354,7 @@ if [[ "$NOTIFY" == slack ]]; then
   fi
   if [[ "$NOTIFY" == slack ]] && ask "Send a test message to Slack?"; then
     resp=$(curl -s -X POST -H 'Content-type: application/json' \
-      --data '{"text":"⚓ Shipyard: connection test ✔"}' "$SLACK_WEBHOOK_URL" || true)
+      --data '{"text":"🏴‍☠️ Kanbandits: connection test ✔"}' "$SLACK_WEBHOOK_URL" || true)
     [[ "$resp" == ok ]] && ok "Test message delivered" || die "Webhook replied: '$resp'"
   fi
 fi
@@ -374,9 +392,33 @@ if (( ! REUSE )); then
   [[ "$LINT_CMD" == "-" ]] && LINT_CMD=""
   prompt BASE_BRANCH "Base branch" \
     "$(git -C "$PROJECT_DIR" symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's|^origin/||' || echo main)"
+  choose choice 0 "Show me the plan for approval before coding" \
+    "Only for large changes (migrations, many files, public APIs)" "Always" "Never, run straight through"
+  PLAN_APPROVAL=$(t=(large always never); echo "${t[choice]}")
+  hint "A git worktree lets the crew work in a separate folder while you keep working in yours."
+  hint "Say No if your app or tests only run from this folder (e.g. a Docker setup tied to it)."
+  ask "Work in a separate git worktree?" && WORKTREE=yes || WORKTREE=no
+  default_app=""
+  if   [[ -x "$PROJECT_DIR/bin/dev" ]]; then default_app="bin/dev"
+  elif [[ -f "$PROJECT_DIR/mix.exs" ]]; then default_app="mix phx.server"
+  elif [[ -x "$PROJECT_DIR/bin/rails" ]]; then default_app="bin/rails server"
+  elif [[ -f "$PROJECT_DIR/artisan" ]]; then default_app="php artisan serve"
+  elif has package.json '"dev"[[:space:]]*:'; then default_app="npm run dev"
+  elif has package.json '"start"[[:space:]]*:'; then default_app="npm start"
+  fi
+  hint "UI QA (Pixel Pete) starts your app and checks changed pages in a browser."
+  prompt APP_CMD "Command that starts the app (- = no UI QA)" "${default_app:--}"
+  [[ "$APP_CMD" == "-" ]] && APP_CMD=""
+  APP_URL=""
+  if [[ -n "$APP_CMD" ]]; then
+    case "$APP_CMD" in *phx*|*rails*|bin/dev) u=http://localhost:3000 ;; *artisan*) u=http://localhost:8000 ;; *) u=http://localhost:3000 ;; esac
+    [[ "$APP_CMD" == *phx* ]] && u=http://localhost:4000
+    has package.json '"vite"' && [[ "$APP_CMD" == npm* ]] && u=http://localhost:5173
+    prompt APP_URL "App URL" "$u"
+  fi
   mkdir -p "$CLAUDE_DIR"
   cat > "$CONF" <<EOF
-# Shipyard config, read by /shipit. Re-run install.sh to regenerate, or edit by hand.
+# Kanbandits config, read by /shipit. Re-run install.sh to regenerate, or edit by hand.
 TICKETS=$TICKETS
 BOARD=$BOARD
 STATUS_IN_PROGRESS=$STATUS_IN_PROGRESS
@@ -388,6 +430,10 @@ NOTIFY_TO=${NOTIFY_TO:-}
 BASE_BRANCH=${BASE_BRANCH:-main}
 TEST_CMD=$TEST_CMD
 LINT_CMD=$LINT_CMD
+PLAN_APPROVAL=$PLAN_APPROVAL
+WORKTREE=$WORKTREE
+APP_CMD=$APP_CMD
+APP_URL=$APP_URL
 EOF
   ok "Config written to $(tilde "$CONF")"
 else
@@ -400,10 +446,8 @@ endsec
 # --- Stack skills --------------------------------------------------------------
 section "5/6" "Stack skills"
 # Detect the stack and offer what makes Codey and Nick better at it:
-#   skill  = expert skill bundled in shipyard/stack-skills, copied into .claude/skills
+#   skill  = expert skill bundled in kanbandits/stack-skills, copied into .claude/skills
 #   plugin = official Claude plugin (LSP = real code intelligence), installed for this project only
-has()   { grep -qiE "$2" "$PROJECT_DIR/$1" 2>/dev/null; }
-exists(){ local f; for f in "$@"; do compgen -G "$PROJECT_DIR/$f" >/dev/null && return 0; done; return 1; }
 SUGGEST=()   # "kind|name|why|what|binary the plugin needs"
 add() { [[ " ${SUGGEST[*]} " == *"|$2|"* ]] || SUGGEST+=("$1|$2|$3|$4|${5:-}"); }
 FRONTEND=0
@@ -441,7 +485,10 @@ if exists package.json; then
   has package.json '"(react|next|vue|nuxt|svelte|@sveltejs/kit|@angular/core|solid-js|astro)"' && FRONTEND=1
 fi
 exists templates 'app/templates' && FRONTEND=1
-(( FRONTEND )) && add plugin frontend-design "Frontend" "UI/UX expert: layout, typography, visual design"
+if (( FRONTEND )); then
+  add plugin frontend-design "Frontend" "UI/UX expert: layout, typography, visual design"
+  add plugin playwright "Frontend" "real browser for Pixel Pete's UI QA (screenshots, clicks)" npx
+fi
 
 plugin_installed() { claude plugin list 2>/dev/null | grep -q "❯ $1@"; }
 INSTALL_SKILLS=() NEW_PLUGINS=()
@@ -490,14 +537,14 @@ if git -C "$PROJECT_DIR" rev-parse --git-dir >/dev/null 2>&1; then
   EXCLUDE="$(git -C "$PROJECT_DIR" rev-parse --git-path info/exclude)"
   [[ "$EXCLUDE" = /* ]] || EXCLUDE="$PROJECT_DIR/$EXCLUDE"
   mkdir -p "$(dirname "$EXCLUDE")"
-  for p in /.claude/skills/shipit/ /.claude/shipyard.conf $(cd "$REPO_DIR/agents" && printf '/.claude/agents/%s ' *.md) \
+  for p in /.claude/skills/shipit/ /.claude/kanbandits.conf /.claude/kanbandits-notes.md /.claude/kanbandits-screenshots/ $(cd "$REPO_DIR/agents" && printf '/.claude/agents/%s ' *.md) \
            ${INSTALL_SKILLS[@]+$(printf '/.claude/skills/%s/ ' "${INSTALL_SKILLS[@]}")}; do
     grep -qxF "$p" "$EXCLUDE" 2>/dev/null || echo "$p" >> "$EXCLUDE"
   done
   ok "Git-ignored locally ${DIM}(.git/info/exclude · never committed)${R}"
 fi
 
-# A global `shipit` would override the project one; a global `ticket-to-pr` is the old pre-Shipyard version.
+# A global `shipit` would override the project one; a global `ticket-to-pr` is the old pre-Kanbandits version.
 for name in shipit ticket-to-pr; do
   GLOBAL_SKILL="$USER_CLAUDE_DIR/skills/$name"
   [[ -d "$GLOBAL_SKILL" ]] || continue
@@ -530,7 +577,7 @@ box "SYSTEM STATUS: READY TO SHIP" \
   "${ACC}Tickets${R}   $TICKETS_LABEL" \
   "${ACC}Notify${R}    $NOTIFY" \
   "${ACC}Tests${R}     $(conf_get TEST_CMD)" \
-  "${ACC}Config${R}    .claude/shipyard.conf" \
+  "${ACC}Config${R}    .claude/kanbandits.conf" \
   "" \
   "${B}${ACC}Run it${R}" \
   "  1  cd $(tilde "$PROJECT_DIR")" \
@@ -541,8 +588,10 @@ box "SYSTEM STATUS: READY TO SHIP" \
   "${B}${ACC}The crew${R}" \
   "  ${ACC}Captain Kanban${R}    Lead      plans and coordinates" \
   "  ${ACC}Codey McCodeface${R}  Sonnet    writes the code (high effort)" \
-  "  ${ACC}Bugsy Malone${R}      Opus      tests and runs the suite" \
+  "  ${ACC}Bugsy Malone${R}      Opus      tests first, then the full suite" \
+  "  ${ACC}Pixel Pete${R}        Opus      UI QA in a browser (UI changes)" \
+  "  ${ACC}Lockdown Larry${R}    Opus      security review (sensitive changes)" \
   "  ${ACC}Nitpick Nick${R}      Opus      reviews (high effort, + ponytail)" \
   "" \
-  "Start from a clean working tree; everything stays uncommitted for review." \
+  "Everything stays uncommitted for review; the crew fixes what review finds." \
   "After deploy, tell the Lead: \"<ticket> is in production, PR <link>\"."
