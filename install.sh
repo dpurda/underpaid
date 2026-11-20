@@ -175,6 +175,7 @@ PY
     for f in "${PATHS[@]}"; do
       [[ -f "$EXCLUDE" ]] && { grep -vxF -e "/.claude/$f" -e "/.claude/$f/" "$EXCLUDE" > "$EXCLUDE.tmp" || true; mv "$EXCLUDE.tmp" "$EXCLUDE"; }
     done
+    [[ -f "$EXCLUDE" ]] && { grep -vxF "/.claude/**/*.bak.*" "$EXCLUDE" > "$EXCLUDE.tmp" || true; mv "$EXCLUDE.tmp" "$EXCLUDE"; }
     ok "cleaned .git/info/exclude"
   fi
   rmdir "$CLAUDE_DIR/agents" "$CLAUDE_DIR/skills" 2>/dev/null || true
@@ -537,7 +538,7 @@ if git -C "$PROJECT_DIR" rev-parse --git-dir >/dev/null 2>&1; then
   EXCLUDE="$(git -C "$PROJECT_DIR" rev-parse --git-path info/exclude)"
   [[ "$EXCLUDE" = /* ]] || EXCLUDE="$PROJECT_DIR/$EXCLUDE"
   mkdir -p "$(dirname "$EXCLUDE")"
-  for p in /.claude/skills/shipit/ /.claude/underpaid.conf /.claude/underpaid-notes.md /.claude/underpaid-screenshots/ $(cd "$REPO_DIR/agents" && printf '/.claude/agents/%s ' *.md) \
+  for p in "/.claude/**/*.bak.*" /.claude/skills/shipit/ /.claude/underpaid.conf /.claude/underpaid-notes.md /.claude/underpaid-screenshots/ $(cd "$REPO_DIR/agents" && printf '/.claude/agents/%s ' *.md) \
            ${INSTALL_SKILLS[@]+$(printf '/.claude/skills/%s/ ' "${INSTALL_SKILLS[@]}")}; do
     grep -qxF "$p" "$EXCLUDE" 2>/dev/null || echo "$p" >> "$EXCLUDE"
   done
