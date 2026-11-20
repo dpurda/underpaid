@@ -535,14 +535,14 @@ box "SYSTEM STATUS: READY TO SHIP" \
   "${B}${ACC}Run it${R}" \
   "  1  cd $(tilde "$PROJECT_DIR")" \
   "  2  claude" \
-  "  3  /model opus  ${DIM}(recommended for the Lead)${R}" \
+  "  3  /model opus  +  /effort high  ${DIM}(recommended for the Lead)${R}" \
   "  4  /shipit $ARG" \
   "" \
   "${B}${ACC}The crew${R}" \
   "  ${ACC}Captain Kanban${R}    Lead      plans and coordinates" \
-  "  ${ACC}Codey McCodeface${R}  Sonnet    writes the code" \
-  "  ${ACC}Bugsy Malone${R}      Sonnet    tests and runs the suite" \
-  "  ${ACC}Nitpick Nick${R}      Opus      reviews (+ ponytail)" \
+  "  ${ACC}Codey McCodeface${R}  Sonnet    writes the code (high effort)" \
+  "  ${ACC}Bugsy Malone${R}      Opus      tests and runs the suite" \
+  "  ${ACC}Nitpick Nick${R}      Opus      reviews (high effort, + ponytail)" \
   "" \
   "Start from a clean working tree; everything stays uncommitted for review." \
   "After deploy, tell the Lead: \"<ticket> is in production, PR <link>\"."

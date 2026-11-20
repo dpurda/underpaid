@@ -14,10 +14,10 @@ Shipyard is a small crew of [Claude Code](https://docs.claude.com/en/docs/claude
 
 | | Name | Role | Model |
 |---|---|---|---|
-| 🧭 | **Captain Kanban** | Team Lead: reads the ticket, makes the plan, coordinates the crew, reports back | your session (Opus recommended) |
-| 🛠️ | **Codey McCodeface** | Developer: implements the plan, never touches existing tests | Sonnet |
-| 🐛 | **Bugsy Malone** | QA: writes specs for the acceptance criteria, runs lint and the full suite | Sonnet |
-| 🧐 | **Nitpick Nick** | Reviewer: read-only correctness review plus `ponytail-review` for over-engineering | Opus |
+| 🧭 | **Captain Kanban** | Team Lead: reads the ticket, makes the plan, coordinates the crew, reports back | your session (Opus, high effort, recommended) |
+| 🛠️ | **Codey McCodeface** | Developer: implements the plan, never touches existing tests | Sonnet, high effort |
+| 🐛 | **Bugsy Malone** | QA: writes specs for the acceptance criteria, runs lint and the full suite | Opus, medium effort |
+| 🧐 | **Nitpick Nick** | Reviewer: read-only correctness review plus `ponytail-review` for over-engineering | Opus, high effort |
 
 ## How it works
 
@@ -99,6 +99,7 @@ Re-running it is safe: it offers to keep your existing config (or edit `.claude/
 cd ~/path/to/your/project   # clean working tree
 claude
 /model opus                 # recommended for Captain Kanban
+/effort high
 /shipit <ticket title or ID>        # or, without ticketing: /shipit <description>
 ```
 
